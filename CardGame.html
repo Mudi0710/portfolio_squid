@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet">
+  <title>Squid Game</title>
+  <style>
+    /* 重置預設 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+
+    /* 設定body長寬與背景圖 */
+    body {
+      width: 100vw;
+      height: 100vh;
+      background: url('./images/background.jpg') no-repeat center center/cover;
+    }
+
+    /* 設定遊戲操作區 */
+    #container {
+      z-index: 2;
+      width: 1600px;
+      height: 900px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 設定中間資訊區 */
+    #info {
+      width: 1600px;
+      height: 420px;
+      position: relative;
+    }
+
+    .info {
+      position: absolute;
+      animation: info 1.5s linear;
+    }
+
+    @keyframes info {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* 設定汗滴與動畫影格 */
+    .sweat {
+      position: absolute;
+      top: 50%;
+      left: 4%;
+      animation: sweat 5s linear infinite;
+    }
+
+    @keyframes sweat {
+      0% {
+        opacity: 0;
+      }
+
+      25% {
+        transform: translateY(100%);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
+    /* 設定OS與動畫影格 */
+    .cloud-left {
+      position: absolute;
+      top: 6%;
+      left: 10.8%;
+      animation: cloud 5s linear infinite;
+    }
+
+    .cloud-right {
+      position: absolute;
+      top: 6%;
+      right: 9.4%;
+      animation: cloud 5s .5s linear infinite;
+    }
+
+    @keyframes cloud {
+      0% {
+        opacity: 0;
+      }
+
+      25% {
+        transform: translateY(-10%);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-10%);
+      }
+    }
+
+    /* 設定苦惱線與動畫影格 */
+    .messline {
+      position: absolute;
+      top: 43.5%;
+      right: 3.3%;
+      animation: messline 0.5s linear infinite;
+    }
+
+    @keyframes messline {
+      50% {
+        transform: rotate(-10deg);
+        opacity: 1;
+      }
+    }
+
+    /* 設定上下排卡片區 */
+    #top-cards,
+    #bottom-cards {
+      width: 1600px;
+      height: 240px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 設定上下排卡片樣式 */
+    .shape-card,
+    .name-card {
+      width: 180px;
+      height: 220px;
+      /* 設定子元素在 3D 空間內 */
+      transform-style: preserve-3d;
+      transition: transform 1s;
+    }
+
+    /* 設定上下排卡片正面樣式 */
+    .card-front {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      /* Y軸旋轉，因為原本 卡片正面 跟 卡片背面 的圖樣都是朝上，所以要讓「正面」「背面」背對背，這樣 3D 旋轉時才能都看到圖樣那一面 */
+      transform: rotateY(180deg);
+      /* 翻過來後隱藏另一面 */
+      backface-visibility: hidden;
+    }
+
+    /* 設定上排卡片背面樣式 */
+    .back-shape {
+      width: 100%;
+      height: 100%;
+      background-image: url('./images/back_shape.png');
+      position: absolute;
+      /* 翻過來後隱藏另一面 */
+      backface-visibility: hidden;
+    }
+
+    /* 設定下排卡片背面樣式 */
+    .back-name {
+      width: 100%;
+      height: 100%;
+      background-image: url('./images/back_name.png');
+      position: absolute;
+      /* 翻過來後隱藏另一面 */
+      backface-visibility: hidden;
+    }
+
+    /* 設定背面 hover 效果 */
+    .back-shape:hover,
+    .back-name:hover {
+      cursor: pointer;
+      transition: .01s;
+      transform: scale(1.2);
+      filter:
+        drop-shadow(0 0 2.5px white) drop-shadow(0 0 5px white) drop-shadow(0 0 7.5px white) drop-shadow(0 0 10px white);
+    }
+
+    /* 設定翻開卡片的變形樣式 */
+    .card-open {
+      transform: rotateY(180deg);
+    }
+
+    /* 設定 replay 樣式 */
+    .replay {
+      text-decoration: none;
+      color: red;
+      font-size: large;
+    }
+
+    /* 設定 replay hover 效果 */
+    .replay:hover {
+      background: skyblue;
+      color: white;
+    }
+
+    /* 設定 bubble1 樣式*/
+    .bubble1 {
+      z-index: 1;
+      width: 40px;
+      height: 40px;
+      opacity: 0.7;
+      position: absolute;
+      bottom: 0;
+      left: 5%;
+      animation: bubble1 8s linear infinite;
+    }
+
+    @keyframes bubble1 {
+      25% {
+        transform: translate(200%, -750%);
+      }
+
+      50% {
+        transform: translate(-0%, -1500%);
+      }
+
+      75% {
+        transform: translate(200%, -2250%);
+      }
+
+      100% {
+        transform: translate(0%, -3000%);
+      }
+    }
+
+    /* 設定 bubble2 樣式*/
+    .bubble2 {
+      z-index: 1;
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      animation: bubble2 8s 1s linear infinite;
+    }
+
+    @keyframes bubble2 {
+      20% {
+        transform: translate(-300%, -1000%);
+      }
+
+      40% {
+        transform: translate(0%, -2000%);
+      }
+
+      60% {
+        transform: translate(300%, -3000%);
+      }
+
+      80% {
+        transform: translate(0%, -4000%);
+      }
+
+      100% {
+        transform: translate(-300%, -5000%);
+      }
+    }
+
+    /* 設定 bubble3 樣式*/
+    .bubble3 {
+      z-index: 1;
+      width: 30px;
+      height: 30px;
+      opacity: 0.7;
+      position: absolute;
+      bottom: 0;
+      left: 45%;
+      animation: bubble3 8s 0.5s linear infinite;
+    }
+
+    @keyframes bubble3 {
+      25% {
+        transform: translate(200%, -1000%);
+      }
+
+      50% {
+        transform: translate(-0%, -2000%);
+      }
+
+      75% {
+        transform: translate(200%, -3000%);
+      }
+
+      100% {
+        transform: translate(0%, -4000%);
+      }
+    }
+
+    /* 設定 bubble4 樣式*/
+    .bubble4 {
+      z-index: 1;
+      width: 50px;
+      height: 50px;
+      opacity: 0.7;
+      position: absolute;
+      bottom: 0;
+      left: 67%;
+      animation: bubble4 8s .3s linear infinite;
+    }
+
+    @keyframes bubble4 {
+      20% {
+        transform: translate(-150%, -500%);
+      }
+
+      40% {
+        transform: translate(0%, -1000%);
+      }
+
+      60% {
+        transform: translate(150%, -1500%);
+      }
+
+      80% {
+        transform: translate(0%, -2000%);
+      }
+
+      100% {
+        transform: translate(-150%, -2500%);
+      }
+    }
+
+    /* 設定 bubble5 樣式*/
+    .bubble5 {
+      z-index: 1;
+      width: 35px;
+      height: 35px;
+      opacity: 0.7;
+      position: absolute;
+      bottom: 0;
+      left: 83%;
+      animation: bubble5 8s 0.5s linear infinite;
+    }
+
+    @keyframes bubble5 {
+      25% {
+        transform: translate(200%, -750%);
+      }
+
+      50% {
+        transform: translate(-0%, -1500%);
+      }
+
+      75% {
+        transform: translate(200%, -2250%);
+      }
+
+      100% {
+        transform: translate(0%, -3000%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div id="top-cards"></div>
+    <div id="info">
+      <img src="./images/title.png" alt="title">
+      <img class="sweat" src="./images/sweat.png" alt="sweat">
+      <img class="cloud-left" src="./images/cloud-left.png" alt="cloud-left">
+      <img class="cloud-right" src="./images/cloud-right.png" alt="cloud-right">
+      <img class="messline" src="./images/messline.png" alt="messline">
+    </div>
+    <div id="bottom-cards"></div>
+  </div>
+  <img class="bubble1" src="./images/bubble.png">
+  <img class="bubble2" src="./images/bubble.png">
+  <img class="bubble3" src="./images/bubble.png">
+  <img class="bubble4" src="./images/bubble.png">
+  <img class="bubble5" src="./images/bubble.png">
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // 產生上排 7 張卡片
+    for (let i = 0; i < 7; i++) {
+      $("#top-cards").append(`
+        <div class="shape-card">
+          <div class="card-front"></div>
+          <div class="back-shape"></div>
+        </div>
+      `)
+    }
+
+    // 產生下排 7 張卡片
+    for (let i = 0; i < 7; i++) {
+      $("#bottom-cards").append(`
+        <div class="name-card">
+          <div class="card-front"></div>
+          <div class="back-name"></div>
+        </div>
+      `)
+    }
+
+    // 將上排卡片加入正面花色與打散順序
+    for (let i = 0; i < 7; i++) {
+      const num = i % 7 + 1
+      // 加入上排正面花色
+      $(".shape-card").eq(i).find(".card-front").css("background-image", `url(./images/front_shape${num}.png)`)
+      $(".shape-card").eq(i).attr("data-topcard", num)
+
+      // 打散上排卡片順序
+      const target = Math.round(Math.random() * 6)
+      $(".shape-card").eq(target).insertAfter($(".shape-card").eq(i))
+    }
+
+    // 將下排卡片加入正面花色與打散順序
+    for (let i = 0; i < 7; i++) {
+      const num2 = i % 7 + 1
+      // 加入下排正面花色
+      $(".name-card").eq(i).find(".card-front").css("background-image", `url(./images/front_name${num2}.png)`)
+      $(".name-card").eq(i).attr("data-bottomcard", num2)
+
+      // 打散下排卡片順序
+      const target = Math.round(Math.random() * 6)
+      $(".name-card").eq(target).insertAfter($(".name-card").eq(i))
+    }
+
+    // 上排翻牌
+    $("#top-cards").on("click", ".shape-card", function () {
+      // 最多翻開一張，且這張牌還沒翻開
+      if ($("#top-cards").find(".card-open").length < 1 && !$(this).hasClass("card-open")) {
+        $(this).addClass("card-open")
+      }
+
+      // 如果上下排都翻開一張了
+      if ($(".card-open").length === 2) {
+        // 如果這兩張的 data number 一樣
+        if ($("#top-cards").find(".card-open").attr("data-topcard") === $("#bottom-cards").find(".card-open").attr("data-bottomcard")) {
+          // 用 class 標記已完成
+          $(".card-open").addClass("card-ok")
+          // 將 .card-front 淡出，如果只對 .card-open 淡出會把 3D 壓平只看到卡背
+          $(".card-open .card-front").fadeTo(1500, 0)
+
+          setTimeout(() => {
+            $("#info").fadeIn(1000, $("#info").append(`
+            <img class="info" src="./images/shape_info${$("#top-cards").find(".card-open").attr("data-topcard")}.png">`))
+            $(".info").prevAll().fadeOut(1000)
+          })
+        }
+
+        // 不管是否一樣都將卡片翻回來
+        setTimeout(() => {
+          // 如果 .card-open 裡的 .card-front 透明度不是 1，把 .card-open 透明度設為 0
+          $(".card-open").each(function () {
+            if ($(this).find(".card-front").css("opacity") != 1) {
+              $(this).css("opacity", 0)
+            }
+          })
+
+          $(".card-open").removeClass("card-open")
+
+          if ($(".card-ok").length === 14) {
+            Swal.fire({
+              heightAuto: false,
+              allowOutsideClick: false,
+              title: '★ 挑戰成功 ★',
+              text: '你解救了小紅人的性命！',
+              footer: '<a href="javascript:window.location.reload()" class="replay"> －－－－－> 我想再認識一次軟足類動物！ <－－－－－ </a>',
+              imageUrl: './images/success.png',
+              imageAlt: '雖然圖片無法載入，但你仍然是小紅人的英雄!',
+            })
+          }
+        }, 1500)
+      }
+    })
+
+    // 下排翻牌
+    $("#bottom-cards").on("click", ".name-card", function () {
+      // 最多翻開一張，且這張牌還沒翻開
+      if ($("#bottom-cards").find(".card-open").length < 1 && !$(this).hasClass("card-open")) {
+        $(this).addClass("card-open")
+      }
+
+      // 如果上下排都翻開一張了
+      if ($(".card-open").length === 2) {
+        // 如果這兩張的 data number 一樣
+        if ($("#top-cards").find(".card-open").attr("data-topcard") === $("#bottom-cards").find(".card-open").attr("data-bottomcard")) {
+          // 用 class 標記已完成
+          $(".card-open").addClass("card-ok")
+          // 將 .card-front 淡出，如果只對 .card-open 淡出會把 3D 壓平只看到卡背
+          $(".card-open .card-front").fadeTo(1500, 0)
+
+          setTimeout(() => {
+            $("#info").fadeIn(1000, $("#info").append(`
+            <img class="info" src="./images/shape_info${$("#bottom-cards").find(".card-open").attr("data-bottomcard")}.png">`))
+            $(".info").prevAll().fadeOut(1000)
+          })
+        }
+
+        // 不管是否一樣都將卡片翻回來
+        setTimeout(() => {
+          // 如果 .card-open 裡的 .card-front 透明度不是 1，把 .card-open 透明度設為 0
+          $(".card-open").each(function () {
+            if ($(this).find(".card-front").css("opacity") != 1) {
+              $(this).css("opacity", 0)
+            }
+          })
+
+          $(".card-open").removeClass("card-open")
+
+          if ($(".card-ok").length === 14) {
+            Swal.fire({
+              heightAuto: false,
+              allowOutsideClick: false,
+              title: '★ 挑戰成功 ★',
+              text: '你解救了小紅人的性命！',
+              footer: '<a href="javascript:window.location.reload()" class="replay"> －－－－－> 我想再認識一次軟足類動物！ <－－－－－ </a>',
+              imageUrl: './images/success.png',
+              imageAlt: '雖然圖片無法載入，但你仍然是小紅人的英雄!',
+            })
+          }
+        }, 1500)
+      }
+    })
+  </script>
+</body>
+
+</html>
